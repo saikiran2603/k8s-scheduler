@@ -1,5 +1,5 @@
-from k8s_scheduler import Scheduler
-from k8s_scheduler.LogHandler import LogHandler
+from src.k8s_scheduler import Scheduler
+from src.k8s_scheduler.LogHandler import LogHandler
 
 scheduler = Scheduler(host="test-mongodb-0.test-mongodb-headless.test-mongodb.svc.cluster.local:27017,test-mongodb-1.test-mongodb-headless.test-mongodb.svc.cluster.local:27017",
                       username="root",
