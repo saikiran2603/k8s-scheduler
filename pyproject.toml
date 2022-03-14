@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=42",
+            "pymongo>=4.0.2",
+            "croniter>=1.3.4",
+            "kubernetes>=23.3.0",
+            "python-dateutil>=2.8.2"]
+build-backend = "setuptools.build_meta"
+
+[project.urls]
+homepage = "https://github.com/saikiran2603/k8s-scheduler/"
+documentation = "https://github.com/saikiran2603/k8s-scheduler/blob/master/README.md"
+source = "https://github.com/saikiran2603/k8s-scheduler/"
+download = "https://github.com/saikiran2603/k8s-scheduler/releases"
+tracker = "https://github.com/saikiran2603/k8s-scheduler/issues"
+
+[project]
+name = "k8s-scheduler"
+license = {file = "LICENSE"}
+
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: BSD License",
+    "Programming Language :: C",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Scientific/Engineering",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: POSIX",
+    "Operating System :: Unix",
+    "Operating System :: MacOS",
+]
