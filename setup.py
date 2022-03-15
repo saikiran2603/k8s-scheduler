@@ -23,4 +23,9 @@ setuptools.setup(
     package_dir={"": "src"},
     packages=setuptools.find_packages(where="src"),
     python_requires=">=3.6",
+    install_requires=["setuptools>=42",
+                      "pymongo>=4.0.2",
+                      "croniter>=1.3.4",
+                      "kubernetes>=23.3.0",
+                      "python-dateutil>=2.8.2"],
 )
