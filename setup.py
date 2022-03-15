@@ -13,11 +13,11 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/saikiran2603/k8s-scheduler/",
     project_urls={
-        "Bug Tracker": "https://github.com/saikiran2603/k8s-scheduler//issues",
+        "Bug Tracker": "https://github.com/saikiran2603/k8s-scheduler/issues",
     },
     classifiers=[
         "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: MIT License",
+        "License :: OSI Approved :: Apache Software License",
         "Operating System :: OS Independent",
     ],
     package_dir={"": "src"},
