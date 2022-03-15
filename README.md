@@ -14,6 +14,12 @@ as per the crontab schedule and monitor its runs.
 These are jobs which are supposed to be running continuously. Like a stream data input. This package would 
 launch and monitor such continuous runs. If any of the run fails for any reason , this package would reschedule it. 
 
+## Installation 
+To install the scheduler run below command, 
+
+```
+pip install k8s-scheduler 
+```
 ## Pre requisites 
 
 As the name suggests it's a job scheduler for kubernetes , so you would need a k8s instance apart from below mandatory and optional requirements.
