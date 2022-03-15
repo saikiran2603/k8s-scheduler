@@ -94,7 +94,7 @@ scheduler = Scheduler(db_name="k8s_scheduler",  # Name of the Mongodb Database
 ```
 
 
-## Log Retrieval , and schedules history.  
+## Log Retrieval and schedules history.  
 
 We can retrieve logs of the jobs by connecting to ELK/EFK stack as below 
 
