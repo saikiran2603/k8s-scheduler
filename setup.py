@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="k8s-scheduler",
-    version="0.0.3",
+    version="0.0.5",
     author="Sai Kiran",
     author_email="neo2603@gmail.com",
     description="Basic Scheduler for k8s",
