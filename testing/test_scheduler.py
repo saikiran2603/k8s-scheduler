@@ -3,7 +3,7 @@ from src.k8s_scheduler.LogHandler import LogHandler
 
 scheduler = Scheduler(host="test-mongodb-0.test-mongodb-headless.test-mongodb.svc.cluster.local:27017,test-mongodb-1.test-mongodb-headless.test-mongodb.svc.cluster.local:27017",
                       username="root",
-                      password="LF0t9E3KOv",
+                      password="SU2vpCJnJd",
                       db_name="test_schedule")
 
 log_handler = LogHandler(elastic_search_server='10.1.179.109',

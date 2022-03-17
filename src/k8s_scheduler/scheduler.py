@@ -125,7 +125,8 @@ class Scheduler:
         try:
             api_response = self.k8s_batch_client.create_namespaced_job(self.k8s_worker_namespace, body, pretty='true')
             print("*********************** Job Created : {} ******************************".format(job_name))
-            # print(api_response)
+            print(api_response.metadata.uid)
+            return api_response.metadata.uid
             # job_resp = self.k8s_batch_client.read_namespaced_job(name=job_name, namespace=self.k8s_worker_namespace)
             # print(job_resp)
         except ApiException as e:
@@ -154,7 +155,8 @@ class Scheduler:
         try:
             api_response = self.k8s_client.create_namespaced_pod(self.k8s_worker_namespace, pod_manifest, pretty='true')
             print("*********************** Pod Created : {} ******************************".format(pod_name))
-            # print(api_response)
+            print(api_response.metadata.uid)
+            return api_response.metadata.uid
             # pod_resp = self.k8s_client.read_namespaced_pod(name=pod_name, namespace=self.k8s_worker_namespace)
             # print(pod_resp)
         except ApiException as e:
@@ -238,8 +240,9 @@ class Scheduler:
             if k8s_rec['restart_policy'] != "":
                 create_job_args['restart_policy'] = k8s_rec['restart_policy']
 
-            self.create_k8s_job(**create_job_args)
+            uid = self.create_k8s_job(**create_job_args)
             self.result_backend.insert_result_record(result_db_collection, {"schedule_name": k8s_rec['name'],
+                                                                            "kubernetes_job_id": uid,
                                                                             "schedule_date": datetime.now()})
 
     def check_stream_jobs(self, schedule_rec, result_db_collection):
@@ -280,8 +283,9 @@ class Scheduler:
             if k8s_rec['restart_policy'] != "":
                 launch_pod_args['restart_policy'] = k8s_rec['restart_policy']
 
-            self.create_k8s_pod(**launch_pod_args)
+            uid = self.create_k8s_pod(**launch_pod_args)
             self.result_backend.insert_result_record(result_db_collection, {"schedule_name": k8s_rec['name'],
+                                                                            "kubernetes_job_id": uid,
                                                                             "schedule_date": datetime.now()})
 
             # check if service needs to be launched.
