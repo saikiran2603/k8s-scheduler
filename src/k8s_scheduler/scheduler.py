@@ -273,8 +273,11 @@ class Scheduler:
 
             if schedule_rec['schedule_enabled'] == 0:
                 print("Deleting pod , Schedule is disabled.")
-                self.k8s_client.delete_namespaced_pod(name=k8s_rec['name'], namespace=self.k8s_worker_namespace)
-                self.k8s_client.delete_namespaced_service(name=k8s_rec['service_name'], namespace=self.k8s_worker_namespace)
+                try:
+                    self.k8s_client.delete_namespaced_pod(name=k8s_rec['name'], namespace=self.k8s_worker_namespace)
+                    self.k8s_client.delete_namespaced_service(name=k8s_rec['service_name'], namespace=self.k8s_worker_namespace)
+                except ApiException:
+                    print("Unhandled Exception - Unable to delete pods ")        
                 launch_pod = False
                 
         except ApiException:
