@@ -254,22 +254,27 @@ class Scheduler:
         # Also if restart policy is Never , then delete the job and launch again
 
         try:
-            pod_status = self.k8s_client.read_namespaced_pod_status(name=k8s_rec['name'], namespace=self.k8s_worker_namespace)
-            if pod_status.status.phase in ["Running", "Pending"]:
-                launch_pod = False
-            elif pod_status.status.phase == 'Succeeded':
-                print("Deleting pod and recreating it ")
-                self.k8s_client.delete_namespaced_pod(name=k8s_rec['name'], namespace=self.k8s_worker_namespace)
-                self.k8s_client.delete_namespaced_service(name=k8s_rec['service_name'], namespace=self.k8s_worker_namespace)
-                launch_pod = True
-            elif pod_status.status.phase == 'Failed':
-                print("Deleting pod and recreating it ")
-                self.k8s_client.delete_namespaced_pod(name=k8s_rec['name'], namespace=self.k8s_worker_namespace)
-                self.k8s_client.delete_namespaced_service(name=k8s_rec['service_name'], namespace=self.k8s_worker_namespace)
-                launch_pod = True
-            else:
-                # Handle case when the pod does not launch at all
-                launch_pod = False
+            if schedule_rec['schedule_enabled'] == 1:
+                try:
+                    pod_status = self.k8s_client.read_namespaced_pod_status(name=k8s_rec['name'], namespace=self.k8s_worker_namespace)
+                    if pod_status.status.phase in ["Running", "Pending"]:
+                        launch_pod = False
+                    elif pod_status.status.phase == 'Succeeded':
+                        print("Deleting pod and recreating it ")
+                        self.k8s_client.delete_namespaced_pod(name=k8s_rec['name'], namespace=self.k8s_worker_namespace)
+                        self.k8s_client.delete_namespaced_service(name=k8s_rec['service_name'], namespace=self.k8s_worker_namespace)
+                        launch_pod = True
+                    elif pod_status.status.phase == 'Failed':
+                        print("Deleting pod and recreating it ")
+                        self.k8s_client.delete_namespaced_pod(name=k8s_rec['name'], namespace=self.k8s_worker_namespace)
+                        self.k8s_client.delete_namespaced_service(name=k8s_rec['service_name'], namespace=self.k8s_worker_namespace)
+                        launch_pod = True
+                    else:
+                        # Handle case when the pod does not launch at all
+                        launch_pod = False
+                except ApiException:
+                    launch_pod = True
+
 
             if schedule_rec['schedule_enabled'] == 0:
                 print("Deleting pod , Schedule is disabled.")
