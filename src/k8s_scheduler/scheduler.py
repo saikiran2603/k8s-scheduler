@@ -270,8 +270,16 @@ class Scheduler:
             else:
                 # Handle case when the pod does not launch at all
                 launch_pod = False
+
+            if schedule_rec['schedule_enabled'] == 0:
+                print("Deleting pod , Schedule is disabled.")
+                self.k8s_client.delete_namespaced_pod(name=k8s_rec['name'], namespace=self.k8s_worker_namespace)
+                self.k8s_client.delete_namespaced_service(name=k8s_rec['service_name'], namespace=self.k8s_worker_namespace)
+                launch_pod = False
+                
         except ApiException:
             # Pod is not scheduled , Schedule the pod.
+            print("Unhandled Exception - Launching POD ")
             launch_pod = True
 
         if launch_pod:
