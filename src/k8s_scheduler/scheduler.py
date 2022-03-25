@@ -195,7 +195,7 @@ class Scheduler:
         iter = croniter(cron_expression, base)
         return iter.get_next(datetime), iter.all_next(datetime), iter.all_prev(datetime)
 
-    def check_crontab_schedule(self, minute, hour, day_of_month, month, day_of_week, second="*", start_date , end_date):
+    def check_crontab_schedule(self, minute, hour, day_of_month, month, day_of_week, start_date , end_date, second="*"):
         cron_expression = minute + " " + hour + " " + day_of_month + " " + month + " " + day_of_week + " " + second
         schedule = list(croniter_range(start_date, end_date, cron_expression))
 
