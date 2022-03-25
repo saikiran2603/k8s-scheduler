@@ -133,7 +133,7 @@ class Scheduler:
             print("Exception when calling Create Namespaced Job : %s\n" % e)
 
     def create_k8s_pod(self, pod_name, container_name, container_image, restart_policy='Never', env_vars=[]):
-        dict_env_vars = [{row[0]: row[1]} for row in env_vars]
+        dict_env_vars = [{"name": row[0], "value": row[1]} for row in env_vars]
         pod_manifest = {
             'apiVersion': 'v1',
             'kind': 'Pod',
