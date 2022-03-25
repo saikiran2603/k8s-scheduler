@@ -3,7 +3,7 @@ from src.k8s_scheduler.LogHandler import LogHandler
 
 scheduler = Scheduler(host="test-mongodb-0.test-mongodb-headless.test-mongodb.svc.cluster.local:27017,test-mongodb-1.test-mongodb-headless.test-mongodb.svc.cluster.local:27017",
                       username="root",
-                      password="SU2vpCJnJd",
+                      password="vqvr6CFGBQ",
                       db_name="test_schedule")
 
 log_handler = LogHandler(elastic_search_server='10.1.179.109',
@@ -19,11 +19,12 @@ test_job_1 = {
         "schedule_type": "periodic",
         "parallel_execution": 0,
         "schedule_crontab": {
-                            "minute": "*/2",
+                            "minute": "*",
                             "hour": "*",
                             "day_of_month": "*",
                             "month": "*",
-                            "day_of_week": "*"
+                            "day_of_week": "*",
+                            "second": "30"
                             },
         "kubernetes_deployment_options": {
                                         "name": "test-schedule-periodic-1",
@@ -50,7 +51,8 @@ test_job_2 = {
                             "hour": "*",
                             "day_of_month": "*",
                             "month": "*",
-                            "day_of_week": "*"
+                            "day_of_week": "*",
+                            "second": "*"
                             },
         "kubernetes_deployment_options": {
                                         "name": "nginx-always",
@@ -77,7 +79,8 @@ test_job_3 = {
                             "hour": "*",
                             "day_of_month": "*",
                             "month": "*",
-                            "day_of_week": "*"
+                            "day_of_week": "*",
+                            "second": "*"
                             },
         "kubernetes_deployment_options": {
                                         "name": "nginx-always-service",

@@ -124,8 +124,8 @@ class Scheduler:
 
         try:
             api_response = self.k8s_batch_client.create_namespaced_job(self.k8s_worker_namespace, body, pretty='true')
-            print("*********************** Job Created : {} ******************************".format(job_name))
-            print(api_response.metadata.uid)
+            print("Job Created : Job name {} Job ID {} ".format(job_name, api_response.metadata.uid))
+            # print(api_response.metadata.uid)
             return api_response.metadata.uid
             # job_resp = self.k8s_batch_client.read_namespaced_job(name=job_name, namespace=self.k8s_worker_namespace)
             # print(job_resp)
@@ -155,8 +155,8 @@ class Scheduler:
         }
         try:
             api_response = self.k8s_client.create_namespaced_pod(self.k8s_worker_namespace, pod_manifest, pretty='true')
-            print("*********************** Pod Created : {} ******************************".format(pod_name))
-            print(api_response.metadata.uid)
+            print("Pod Created : Pod name {} Pod ID - {}".format(pod_name, api_response.metadata.uid))
+            # print(api_response.metadata.uid)
             return api_response.metadata.uid
             # pod_resp = self.k8s_client.read_namespaced_pod(name=pod_name, namespace=self.k8s_worker_namespace)
             # print(pod_resp)
@@ -185,7 +185,7 @@ class Scheduler:
         }
         try:
             api_response = self.k8s_client.create_namespaced_service(self.k8s_worker_namespace, manifest, pretty='true')
-            print("*********************** Service Created : {} ******************************".format(service_name))
+            print("Service Created : Service name {} Service ID {} ".format(service_name, api_response.metadata.uid))
 
         except ApiException as e:
             print("Exception when calling Create Namespaced Service : %s\n" % e)
@@ -252,46 +252,53 @@ class Scheduler:
 
         # In case of stream pods , no need to check if pod is running , no parallel execution happens. Check if pod is not running, and launch if not.
         # Also if restart policy is Never , then delete the job and launch again
-
         try:
-            if schedule_rec['schedule_enabled'] == 1:
-                try:
-                    pod_status = self.k8s_client.read_namespaced_pod_status(name=k8s_rec['name'], namespace=self.k8s_worker_namespace)
-                    if pod_status.status.phase in ["Running", "Pending"]:
-                        launch_pod = False
-                    elif pod_status.status.phase == 'Succeeded':
-                        print("Deleting pod and recreating it ")
-                        self.k8s_client.delete_namespaced_pod(name=k8s_rec['name'], namespace=self.k8s_worker_namespace)
-                        self.k8s_client.delete_namespaced_service(name=k8s_rec['service_name'], namespace=self.k8s_worker_namespace)
-                        launch_pod = True
-                    elif pod_status.status.phase == 'Failed':
-                        print("Deleting pod and recreating it ")
-                        self.k8s_client.delete_namespaced_pod(name=k8s_rec['name'], namespace=self.k8s_worker_namespace)
-                        self.k8s_client.delete_namespaced_service(name=k8s_rec['service_name'], namespace=self.k8s_worker_namespace)
-                        launch_pod = True
-                    else:
-                        # Handle case when the pod does not launch at all
-                        launch_pod = False
-                except ApiException:
-                    launch_pod = True
-
-
-            if schedule_rec['schedule_enabled'] == 0:
-                print("Deleting pod , Schedule is disabled.")
-                try:
-                    self.k8s_client.delete_namespaced_pod(name=k8s_rec['name'], namespace=self.k8s_worker_namespace)
-                    self.k8s_client.delete_namespaced_service(name=k8s_rec['service_name'], namespace=self.k8s_worker_namespace)
-                except ApiException:
-                    print("Unhandled Exception - Unable to delete pods ")        
-                launch_pod = False
-                
+            pod_status = self.k8s_client.read_namespaced_pod_status(name=k8s_rec['name'], namespace=self.k8s_worker_namespace)
+            pod_active = True
         except ApiException:
-            # Pod is not scheduled , Schedule the pod.
-            print("Unhandled Exception - Launching POD ")
-            launch_pod = True
+            pod_active = False
+
+        if schedule_rec['schedule_enabled'] == 1:
+            # Schedule active
+            if pod_active:
+                if pod_status.status.phase in ["Running", "Pending"]:
+                    launch_pod = False
+                    delete_pod = False
+                elif pod_status.status.phase == 'Succeeded':
+                    print("Pod Status Succeeded : Deleting pod and recreating it ")
+                    delete_pod = True
+                    launch_pod = True
+                elif pod_status.status.phase == 'Failed':
+                    print("Pod Status Failed : Deleting pod and recreating it ")
+                    delete_pod = True
+                    launch_pod = True
+                else:
+                    print("Unhandled Case ")
+                    # Handle case when the pod does not launch at all
+                    launch_pod = False
+                    delete_pod = False
+            else:
+                delete_pod = False
+                launch_pod = True
+        else:
+            # Schedule inactive
+            if pod_active:
+                # Delete the pod
+                delete_pod = True
+                launch_pod = False
+            else:
+                delete_pod = False
+                launch_pod = False
+
+        if delete_pod:
+            # Delete the pod
+            self.k8s_client.delete_namespaced_pod(name=k8s_rec['name'], namespace=self.k8s_worker_namespace)
+            if k8s_rec['deploy_service'] == 1:
+                self.k8s_client.delete_namespaced_service(name=k8s_rec['service_name'], namespace=self.k8s_worker_namespace)
 
         if launch_pod:
             # pod_name, container_name, container_image, restart_policy='Always', env_vars=[]
+            print("Always - Running Stream job {} at current time {} ".format(schedule_rec['schedule_name'], datetime.now()))
             launch_pod_args = {"pod_name": k8s_rec['name'],
                                "container_name": k8s_rec['container_name'],
                                "container_image": k8s_rec['container_image'],
@@ -320,12 +327,13 @@ class Scheduler:
             for rec in records:
                 if rec['schedule_type'] == 'periodic':
                     # check crontab schedule and determine if the job is to be executed or not
-                    run_schedule, schedule_date = self.check_crontab_schedule(start_date=start_time,
-                                                                              end_date=start_time + timedelta(seconds=self.scheduler_poll_interval),
-                                                                              **rec['schedule_crontab'])
-                    if run_schedule:
-                        print("Running Scheduled job as per schedule - {} at current time {} ".format(schedule_date, datetime.now()))
-                        self.check_periodic_schedules(rec, result_db_collection)
+                    if rec['schedule_enabled'] == 1:
+                        run_schedule, schedule_date = self.check_crontab_schedule(start_date=start_time,
+                                                                                  end_date=start_time + timedelta(seconds=self.scheduler_poll_interval),
+                                                                                  **rec['schedule_crontab'])
+                        if run_schedule:
+                            print("Periodic - Running Scheduled job {} as per schedule - {} at current time {} ".format(rec['schedule_name'],schedule_date, datetime.now()))
+                            self.check_periodic_schedules(rec, result_db_collection)
                 elif rec['schedule_type'] == 'always':
                     self.check_stream_jobs(rec, result_db_collection)
                 else:
